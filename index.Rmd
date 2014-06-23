@@ -1,0 +1,71 @@
+---
+title       : Shiny Application Description
+subtitle    : How it was developed
+author      : Xavier Noguerola
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Motivation
+
+The application lets you obtain and estimation of the fuel consumption of your car based on its weight and transmission type (automatic or manual).
+
+More specialized studies has shown that weight and transmission type are the most influencers in terms of fuel consumption.
+
+This application can be very useful to manage your budget in long journeys, specially if your car weight varies (you travel with more people or carries something heavy).
+
+It can help you decide if it's worth travelling by car or by any other way.
+
+---
+
+## Data used
+
+The application estimates the fuel consumption using the R dataset *mtcars* which includes fuel consumption information about different cars with different features.
+
+During the study, fuel consumption is expressed as US gallon/100 miles.
+
+The following plots show the relationship between fuel consumption, weight and transmission type
+
+```{r echo=FALSE,fig.height=5,fig.width=5,fig.align='center'}
+data(mtcars)
+pairs(100/mpg~wt+am,data=mtcars,labels=c('consumption','weight','transmission'))
+```
+
+---
+
+## Model used
+
+The consumption is estimated using a linear regression model using the fuel consumption (US gallon/100 miles) as the response variable and the predictive variables are the weight and the transmission type (including interactions).
+
+The results of the regression are the following:
+
+```{r}
+fit <- lm(100/mpg~wt*factor(am),data=mtcars)
+fit$coefficients
+```
+
+---
+
+## Results
+
+The shiny app provides, appart from the numeric estimation, a plot showing the fuel consumption versus the weight depending on the transmission type. Basically, two different plots are shown depending on the two values of the transmission type (the plot is refreshed every time the transmission type is set in the shiny app).
+
+These two regression lines are plot below:
+
+```{r echo=FALSE,fig.height=3.8,fig.width=9,fig.align='center'}
+x0 <- data.frame(wt=c(1,8),am=0)
+x1 <- data.frame(wt=c(1,8),am=1)
+y0 <- predict(fit,x0)
+y1 <- predict(fit,x1)
+plot(c(1,8),c(0,14),type='n',xlab='Weight',ylab='Fuel consumption')
+lines(x0$wt, y0,col='blue',lwd=2.5)
+lines(x1$wt, y1,col='red',lwd=2.5)
+legend(x=6,y=7,legend= c('Automatic','Manual'),lty=c(1,1),lwd=c(2.5,2.5),col=c("blue","red"))
+```
+
+Additionally, in the shiny app a red point indicates the position in the plot of the input car.
